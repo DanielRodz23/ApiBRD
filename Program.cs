@@ -13,6 +13,7 @@ builder.Services.AddSwaggerGen();
 string cadena = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new Exception();
 
 builder.Services.AddDbContext<LabsystePwaBrdContext>(options => options.UseMySql(cadena, ServerVersion.AutoDetect(cadena)));
+builder.Services.AddControllers();
 
 var app = builder.Build();
 
