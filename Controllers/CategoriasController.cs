@@ -56,11 +56,12 @@ namespace ApiBRD.Controllers
             return Ok("La categoria fue agregada con exito.");
         }
 
+        [HttpPut]
         public async Task<IActionResult> EditarCategoria(CategoriaDTO dto)
         {
             var categoria = context.Categoria.Find(dto.Id);
 
-            if(categoria != null)
+            if(categoria == null)
             {
                 return NotFound("La categoria que intenta editar no fue encontrada.");
             }
@@ -81,5 +82,21 @@ namespace ApiBRD.Controllers
         }
 
 
+        [HttpDelete]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var categoriaExistente = context.Categoria.Find(id);
+            if(categoriaExistente == null)
+            {
+                return NotFound("No se pudo encontrar la categoria que desea eliminar.");
+            }
+
+            context.Remove(categoriaExistente);
+            context.SaveChanges();
+
+            await HubContext.Clients.All.SendAsync("CategoriaEliminada", categoriaExistente.Id);
+
+            return Ok("La categoria fue eliminada con exito.");
+        }
     }
 }
