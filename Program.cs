@@ -1,4 +1,5 @@
 using ApiBRD.Models.Entities;
+using ApiBRD.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -28,7 +29,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
-
+app.MapHub<CategoriaHub>("/hub");
 app.MapControllers();
 
 app.Run();
