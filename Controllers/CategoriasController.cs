@@ -37,7 +37,7 @@ namespace ApiBRD.Controllers
 
 
         [HttpPost]
-        public async Task<IActionResult> Post(CategoriaDTO dto)
+        public async Task<IActionResult> AgregarCategoria(CategoriaDTO dto)
         {
             if (string.IsNullOrWhiteSpace(dto.Nombre))
             {
@@ -71,7 +71,7 @@ namespace ApiBRD.Controllers
 
             if(total > 0)
             {
-                await HubContext.Clients.All.SendAsync("Categoria Editada", new
+                await HubContext.Clients.All.SendAsync("CategoriaEditada", new
                 {
                     categoria.Id,
                     categoria.Nombre,
@@ -83,7 +83,7 @@ namespace ApiBRD.Controllers
 
 
         [HttpDelete]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> EliminarCategoria(int id)
         {
             var categoriaExistente = context.Categoria.Find(id);
             if(categoriaExistente == null)
