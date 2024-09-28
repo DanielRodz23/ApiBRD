@@ -41,5 +41,14 @@ namespace ApiBRD.Repositories
             Context.SaveChanges();
         }
 
+        public virtual void Delete(object id)
+        {
+            var entity = ctx.Find<T>(id);
+            if (entity != null)
+            {
+                ctx.Remove(entity);
+            }
+            ctx.SaveChanges();
+        }
     }
 }
