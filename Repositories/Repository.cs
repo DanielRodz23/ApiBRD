@@ -1,52 +1,54 @@
 ﻿using ApiBRD.Models.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace ApiBRD.Repositories
 {
     public class Repository<T> where T : class
     {
-
-        public LabsystePwaBrdContext ctx;
-        public Repository(LabsystePwaBrdContext ctx)
+        public LabsystePwaBrdContext Context { get; set; }
+        public Repository(LabsystePwaBrdContext context)
         {
-            this.ctx = ctx;
+            Context = context;
         }
 
-        public virtual IEnumerable<T> GetAll()
+        public T GetById(int id)
         {
-            return ctx.Set<T>();
+            return Context.Set<T>().Find(id);
         }
 
-        public virtual T? Get(object id)
+        public IList<T> GetAll()
         {
-            return ctx.Find<T>(id);
+            return Context.Set<T>().ToList();
         }
 
-        public virtual void Insert(T entity)
+        public void Insert(T entity)
         {
-            ctx.Add(entity);
-            ctx.SaveChanges();
+            Context.Set<T>().Add(entity);
+            Context.SaveChanges();
+
         }
 
-        public virtual void Update(T entity)
+        public void Update(T entity)
         {
-            ctx.Update(entity);
-            ctx.SaveChanges();
+            Context.Entry(entity).State = EntityState.Modified;
+            Context.SaveChanges();
+
         }
 
-        public virtual void Delete(T entity)
+        public void Delete(T entity)
         {
-            ctx.Remove(entity);
-            ctx.SaveChanges();
+            Context.Set<T>().Remove(entity);
+            Context.SaveChanges();
         }
 
         public virtual void Delete(object id)
         {
-            var entity = ctx.Find<T>(id);
+            var entity = Context.Find<T>(id);
             if (entity != null)
             {
-                ctx.Remove(entity);
+                Context.Remove(entity);
             }
-            ctx.SaveChanges();
+            Context.SaveChanges();
         }
     }
 }

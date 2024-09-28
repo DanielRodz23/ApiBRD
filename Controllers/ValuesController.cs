@@ -1,4 +1,5 @@
-﻿using ApiBRD.Models.Entities;
+﻿using ApiBRD.Models.DTOs;
+using ApiBRD.Models.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,10 +15,14 @@ namespace ApiBRD.Controllers
         {
             this.context = context;
         }
+
         [HttpGet]
-        public IActionResult Get()
+        public IActionResult GetAll()
         {
             return Ok(context.Producto.ToList());
         }
+
+       
+    
     }
 }
