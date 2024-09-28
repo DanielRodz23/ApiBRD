@@ -32,4 +32,9 @@ app.UseAuthorization();
 app.MapHub<CategoriaHub>("/hub");
 app.MapControllers();
 
+app.UseCors(builder => builder
+    .AllowAnyOrigin()
+    .AllowAnyMethod()
+    .AllowAnyHeader());
+
 app.Run();
