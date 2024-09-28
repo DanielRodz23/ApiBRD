@@ -16,9 +16,9 @@ namespace ApiBRD.Controllers
             this.repositoryMenu = repositoryMenu;
         }
         [HttpGet]
-        public Task<IActionResult> Get() 
+        public async Task<IActionResult> Get() 
         {
-
+            return Ok();
         }
     }
 }
