@@ -3,10 +3,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ApiBRD.Repositories
 {
-    public class IRepository<T> where T : class
+    public class Repository<T> where T : class
     {
         public LabsystePwaBrdContext Context { get; set; }
-        public IRepository(LabsystePwaBrdContext context)
+        public Repository(LabsystePwaBrdContext context)
         {
             Context = context;
         }
@@ -43,12 +43,12 @@ namespace ApiBRD.Repositories
 
         public virtual void Delete(object id)
         {
-            var entity = ctx.Find<T>(id);
+            var entity = Context.Find<T>(id);
             if (entity != null)
             {
-                ctx.Remove(entity);
+                Context.Remove(entity);
             }
-            ctx.SaveChanges();
+            Context.SaveChanges();
         }
     }
 }
