@@ -23,6 +23,7 @@ builder.Services.AddDbContext<LabsystePwaBrdContext>(options => options.UseMySql
 builder.Services.AddControllers();
 builder.Services.AddTransient<Repository<Menudeldia>>();
 builder.Services.AddTransient<Repository<Producto>>();
+builder.Services.AddTransient<Repository<Categoria>>();
 
 builder.Services.AddAutoMapper(typeof(Program));
 

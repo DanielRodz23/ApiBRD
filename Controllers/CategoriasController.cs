@@ -1,9 +1,12 @@
 ﻿using ApiBRD.Models.DTOs;
 using ApiBRD.Models.Entities;
+using ApiBRD.Repositories;
 using ApiBRD.Services;
+using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 
 namespace ApiBRD.Controllers
 {
@@ -11,28 +14,26 @@ namespace ApiBRD.Controllers
     [ApiController]
     public class CategoriasController : ControllerBase
     {
+        private readonly Repository<Categoria> repository;
+        private readonly IMapper mapper;
 
         public LabsystePwaBrdContext context { get; }
         public IHubContext<CategoriaHub> HubContext { get; }
 
 
-        public CategoriasController(LabsystePwaBrdContext context, IHubContext<CategoriaHub> hubContext)
+        public CategoriasController(Repository<Categoria> repository,LabsystePwaBrdContext context, IHubContext<CategoriaHub> hubContext, IMapper mapper)
         {
+            this.repository = repository;
             this.context = context;
             HubContext = hubContext;
+            this.mapper = mapper;
         }
 
         [HttpGet]
         public IActionResult GetAll()
         {
-            var categorias = context.Categoria;
-
-            return Ok(categorias.Select(x => new
-            {
-                x.Id,
-                x.Nombre,
-                x.Producto
-            }));
+            var categorias = repository.Context.Categoria.Include(x => x.Producto).ToList().Select(x=>mapper.Map<CategoriaIncludeDTO>(x));
+            return Ok(categorias);
         }
 
 
