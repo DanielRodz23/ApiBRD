@@ -16,10 +16,10 @@ namespace ApiBRD.Controllers
             this.context = context;
         }
 
-        [HttpGet]
+        [HttpGet("/")]
         public IActionResult GetAll()
         {
-            return Ok(context.Producto.ToList());
+            return Ok("Working");
         }
 
        
