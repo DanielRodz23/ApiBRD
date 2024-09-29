@@ -1,4 +1,5 @@
-﻿using ApiBRD.Models.DTOs;
+﻿using ApiBRD.Helpers;
+using ApiBRD.Models.DTOs;
 using ApiBRD.Models.Entities;
 using ApiBRD.Repositories;
 using ApiBRD.Services;
@@ -16,17 +17,19 @@ namespace ApiBRD.Controllers
     {
         private readonly Repository<Categoria> repository;
         private readonly IMapper mapper;
+        private readonly IWebHostEnvironment webHostEnvironment;
 
         public LabsystePwaBrdContext context { get; }
         public IHubContext<CategoriaHub> HubContext { get; }
 
 
-        public CategoriasController(Repository<Categoria> repository,LabsystePwaBrdContext context, IHubContext<CategoriaHub> hubContext, IMapper mapper)
+        public CategoriasController(Repository<Categoria> repository,LabsystePwaBrdContext context, IHubContext<CategoriaHub> hubContext, IMapper mapper, IWebHostEnvironment webHostEnvironment)
         {
             this.repository = repository;
             this.context = context;
             HubContext = hubContext;
             this.mapper = mapper;
+            this.webHostEnvironment = webHostEnvironment;
         }
 
         [HttpGet]
@@ -38,7 +41,7 @@ namespace ApiBRD.Controllers
 
 
         [HttpPost]
-        public async Task<IActionResult> AgregarCategoria(CategoriaDTO dto)
+        public async Task<IActionResult> AgregarCategoria(CategoriaImagenDTO dto)
         {
             if (string.IsNullOrWhiteSpace(dto.Nombre))
             {
@@ -47,11 +50,13 @@ namespace ApiBRD.Controllers
 
             Categoria d = new()
             {
-                Id = 0,
                 Nombre = dto.Nombre
             };
-            context.Add(d);
-            context.SaveChanges();
+
+            repository.Insert(d);
+            Thread.Sleep(1000);
+            string path = Path.Combine(webHostEnvironment.WebRootPath, "categorias", d.Id.ToString());
+            ImagenConverter.ConvertBase64ToImage(dto.ImagenBase64, path);
 
             await HubContext.Clients.All.SendAsync("NuevaCategoria", d);
             return Ok("La categoria fue agregada con exito.");

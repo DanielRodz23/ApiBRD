@@ -41,11 +41,16 @@ namespace ApiBRD.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AgregarProducto(ProductoDTO dto)
+        public async Task<IActionResult> AgregarProducto(ProductoImagenDTO dto)
         {
             if (string.IsNullOrWhiteSpace(dto.Nombre))
             {
                 return BadRequest("Ingrese un nombre para el producto.");
+            }
+            if (string.IsNullOrWhiteSpace(dto.ImagenBase64))
+            {
+                return BadRequest("Envie la imagen en base 64.");
+
             }
 
             Producto p = new()
@@ -57,9 +62,25 @@ namespace ApiBRD.Controllers
             };
             repository.Insert(p);
 
+
+
             await hubContext.Clients.All.SendAsync("NuevoProducto", p);
 
             return Ok("El producto fue agregado con exito.");
+        }
+
+        [HttpGet("disponble")]
+        public async Task<IActionResult> UpdateDisponible([FromQuery] int id, [FromQuery] bool disponible)
+        {
+            var dato = repository.GetById(id);
+            if (dato == null)
+            {
+                return BadRequest("No existe en la base de datos");
+            }
+
+            dato.Disponible = disponible;
+            repository.Update(dato);
+            return Ok();
         }
 
         [HttpPut]
@@ -85,11 +106,18 @@ namespace ApiBRD.Controllers
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> EliminarProducto(int id)
         {
-            var productoexistente = repository.GetById(id);
+            Producto productoexistente = repository.GetById(id);
 
             if (productoexistente == null)
             {
                 return NotFound("No se pudo encontrar el producto que desea eliminar.");
+            }
+
+            if (repository.Context.Menudeldia.Any(x => x.IdProducto == productoexistente.Id))
+            {
+                var men = repository.Context.Menudeldia.FirstOrDefault(x => x.IdProducto == productoexistente.Id)??throw new Exception("Error al buscar en menu del dia");
+                repository.Context.Set<Menudeldia>().Remove(men);
+                repository.Context.SaveChanges();
             }
 
             repository.Delete(id);

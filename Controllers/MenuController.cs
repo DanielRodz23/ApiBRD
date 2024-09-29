@@ -23,7 +23,7 @@ namespace ApiBRD.Controllers
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            var datos = repositoryMenu.Context.Menudeldia.Include(x => x.IdProductoNavigation).ToList().Select(x=>mapper.Map<MenuDelDiaDTO>(x));
+            var datos = repositoryMenu.Context.Menudeldia.Include(x => x.IdProductoNavigation).ToList().Select(x => mapper.Map<MenuDelDiaDTO>(x));
             //datos.ForEach(x => x.IdProductoNavigation.Menudeldia = null);
             //datos.ForEach(x => mapper.Map<MenuDelDiaDTO>(x));
             return Ok(datos);
@@ -31,26 +31,34 @@ namespace ApiBRD.Controllers
         [HttpPost]
         public async Task<IActionResult> Post(int[] ids)
         {
-            int cant = 5;
-
-            if (ids.GroupBy(x => x).Count() < cant)
+            if (ids.Length == 0)
             {
-                return BadRequest($"Deben ser {cant} productos");
+                return BadRequest();
             }
+
+            ids = ids.Where(x => x != 0).Distinct().ToArray();
 
 
             var alldata = repositoryMenu.GetAll().ToList();
 
-
-            repositoryMenu.Context.RemoveRange(alldata);
-            repositoryMenu.Context.SaveChanges();
+            foreach (var item in alldata)
+            {
+                repositoryMenu.Context.Remove(item);
+                repositoryMenu.Context.SaveChanges();
+            }
 
 
             for (int i = 0; i < ids.Length; i++)
             {
-                var newmenu = new Menudeldia { IdProducto = ids[i] };
-                repositoryMenu.Insert(newmenu);
+                if (!repositoryMenu.Context.Producto.Any(x => x.Id == ids[i]))
+                {
+                    continue;
+                }
+
+                var newmenu = new Menudeldia() { IdProducto = ids[i] };
+                repositoryMenu.Context.Menudeldia.Add(newmenu);
             }
+            repositoryMenu.Context.SaveChanges();
 
             return Ok();
         }
