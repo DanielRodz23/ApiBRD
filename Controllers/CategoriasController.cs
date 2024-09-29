@@ -56,7 +56,7 @@ namespace ApiBRD.Controllers
 
             try
             {
-                string path = Path.Combine(webHostEnvironment.WebRootPath, "categorias", d.Id.ToString());
+                string path = Path.Combine(webHostEnvironment.ContentRootPath, "categorias", d.Id.ToString());
                 ImagenConverter.ConvertBase64ToImage(dto.ImagenBase64, path);
             }
             catch (Exception ex)

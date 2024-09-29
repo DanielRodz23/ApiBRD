@@ -67,7 +67,7 @@ namespace ApiBRD.Controllers
 
             try
             {
-                string path = Path.Combine(webHostEnvironment.WebRootPath, "producto", p.Id.ToString());
+                string path = Path.Combine(webHostEnvironment.ContentRootPath, "producto", p.Id.ToString());
                 ImagenConverter.ConvertBase64ToImage(dto.ImagenBase64, path);
             }
             catch (Exception ex)
@@ -81,7 +81,7 @@ namespace ApiBRD.Controllers
             return Ok("El producto fue agregado con exito.");
         }
 
-        [HttpGet("disponble")]
+        [HttpGet("disponible")]
         public async Task<IActionResult> UpdateDisponible([FromQuery] int id, [FromQuery] bool disponible)
         {
             var dato = repository.GetById(id);
