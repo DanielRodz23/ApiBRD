@@ -5,6 +5,7 @@ using ApiBRD.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using ApiBRD.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +21,10 @@ string cadena = builder.Configuration.GetConnectionString("DefaultConnection") ?
 
 builder.Services.AddDbContext<LabsystePwaBrdContext>(options => options.UseMySql(cadena, ServerVersion.AutoDetect(cadena)));
 builder.Services.AddControllers();
+builder.Services.AddTransient<Repository<Menudeldia>>();
+builder.Services.AddTransient<Repository<Producto>>();
+
+builder.Services.AddAutoMapper(typeof(Program));
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(x =>
 {

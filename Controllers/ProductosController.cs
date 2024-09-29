@@ -1,6 +1,8 @@
 ﻿using ApiBRD.Models.DTOs;
 using ApiBRD.Models.Entities;
+using ApiBRD.Repositories;
 using ApiBRD.Services;
+using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
@@ -11,31 +13,32 @@ namespace ApiBRD.Controllers
     [ApiController]
     public class ProductosController : ControllerBase
     {
-        public ProductosController(LabsystePwaBrdContext context, IHubContext<CategoriaHub> hubContext)
+        private readonly Repository<Producto> repository;
+        private readonly IHubContext<CategoriaHub> hubContext;
+        private readonly IMapper mapper;
+
+        public ProductosController(Repository<Producto> repository, IHubContext<CategoriaHub> hubContext, IMapper mapper)
         {
-            Context = context;
-            HubContext = hubContext;
+            this.repository = repository;
+            this.hubContext = hubContext;
+            this.mapper = mapper;
         }
 
-        public LabsystePwaBrdContext Context { get; }
-        public IHubContext<CategoriaHub> HubContext { get; }
 
 
         [HttpGet]
-        public IActionResult GetAll(int idcategoria)
+        public IActionResult GetAll()
         {
-            var productos = Context.Producto.Where(x => x.IdCategoria == idcategoria);
-
-            return Ok(productos.Select(x => new
-            {
-                x.Id,
-                x.IdCategoria,
-                x.Disponible,
-                x.Nombre,
-                x.Precio
-            }));
+            var data = repository.GetAll().Select(x => mapper.Map<ProductoDTO>(x));
+            return Ok(data);
         }
 
+        [HttpGet("{id:int}")]
+        public IActionResult GetById(int id)
+        {
+            var dato = repository.GetById(id);
+            return Ok(mapper.Map<ProductoDTO>(dato));
+        }
 
         [HttpPost]
         public async Task<IActionResult> AgregarProducto(ProductoDTO dto)
@@ -47,64 +50,51 @@ namespace ApiBRD.Controllers
 
             Producto p = new()
             {
-                Id = 0,
                 Nombre = dto.Nombre,
                 Precio = dto.Precio,
                 Disponible = dto.Disponible,
                 IdCategoria = dto.IdCategoria
             };
-            Context.Add(p);
-            Context.SaveChanges();
+            repository.Insert(p);
 
-            await HubContext.Clients.All.SendAsync("NuevoProducto",p);
+            await hubContext.Clients.All.SendAsync("NuevoProducto", p);
+
             return Ok("El producto fue agregado con exito.");
         }
 
         [HttpPut]
         public async Task<IActionResult> EditarProducto(ProductoDTO dto)
         {
-            var productoexistente = Context.Producto.Find(dto.Id);
+            var productoexistente = repository.GetById(dto.Id);
 
-            if(productoexistente == null)
+            if (productoexistente == null)
             {
                 return NotFound("El producto que intenta editar no fue encontrado.");
             }
             productoexistente.Nombre = dto.Nombre;
             productoexistente.Precio = dto.Precio;
             productoexistente.Disponible = dto.Disponible;
-            Context.Update(productoexistente);
 
-            int total = Context.SaveChanges();
+            repository.Update(productoexistente);
 
-            if(total > 0)
-            {
-                await HubContext.Clients.All.SendAsync("ProductoEditado", new
-                {
-                    productoexistente.Id,
-                    productoexistente.Nombre,
-                    productoexistente.Precio,
-                    productoexistente.Disponible,
-                    productoexistente.IdCategoria
-                });
-            }
+            await hubContext.Clients.All.SendAsync("ProductoEditado", mapper.Map<ProductoDTO>(productoexistente));
 
             return Ok("El producto fue editado con exito.");
         }
 
-        [HttpDelete]
+        [HttpDelete("{id:int}")]
         public async Task<IActionResult> EliminarProducto(int id)
         {
-            var productoexistente = Context.Producto.Find(id);
+            var productoexistente = repository.GetById(id);
 
-            if(productoexistente == null)
+            if (productoexistente == null)
             {
                 return NotFound("No se pudo encontrar el producto que desea eliminar.");
             }
 
-            Context.Remove(productoexistente);
-            Context.SaveChanges();
+            repository.Delete(id);
 
-            await HubContext.Clients.All.SendAsync("ProductoEliminado", productoexistente.Id);
+            await hubContext.Clients.All.SendAsync("ProductoEliminado", productoexistente.Id);
 
             return Ok("El producto fue eliminado con exito.");
         }
