@@ -36,9 +36,7 @@ public partial class LabsystePwaBrdContext : DbContext
 
             entity.ToTable("categoria");
 
-            entity.Property(e => e.Id)
-                .ValueGeneratedNever()
-                .HasColumnType("int(11)");
+            entity.Property(e => e.Id).HasColumnType("int(11)");
             entity.Property(e => e.Nombre).HasMaxLength(20);
         });
 
@@ -48,15 +46,14 @@ public partial class LabsystePwaBrdContext : DbContext
 
             entity.ToTable("menudeldia");
 
-            entity.HasIndex(e => e.IdProducto, "IdProducto");
+            entity.HasIndex(e => e.IdProducto, "menudeldia_ibfk_1");
 
-            entity.Property(e => e.Id)
-                .ValueGeneratedNever()
-                .HasColumnType("int(11)");
+            entity.Property(e => e.Id).HasColumnType("int(11)");
             entity.Property(e => e.IdProducto).HasColumnType("int(11)");
 
             entity.HasOne(d => d.IdProductoNavigation).WithMany(p => p.Menudeldia)
                 .HasForeignKey(d => d.IdProducto)
+                .OnDelete(DeleteBehavior.SetNull)
                 .HasConstraintName("menudeldia_ibfk_1");
         });
 
@@ -68,9 +65,7 @@ public partial class LabsystePwaBrdContext : DbContext
 
             entity.HasIndex(e => e.IdCategoria, "IdCategoria");
 
-            entity.Property(e => e.Id)
-                .ValueGeneratedNever()
-                .HasColumnType("int(11)");
+            entity.Property(e => e.Id).HasColumnType("int(11)");
             entity.Property(e => e.IdCategoria).HasColumnType("int(11)");
             entity.Property(e => e.Nombre).HasMaxLength(100);
             entity.Property(e => e.Precio).HasPrecision(10);
@@ -86,10 +81,8 @@ public partial class LabsystePwaBrdContext : DbContext
 
             entity.ToTable("usuario");
 
-            entity.Property(e => e.Id)
-                .ValueGeneratedNever()
-                .HasColumnType("int(11)");
-            entity.Property(e => e.Password).HasMaxLength(100);
+            entity.Property(e => e.Id).HasColumnType("int(11)");
+            entity.Property(e => e.Password).HasMaxLength(128);
             entity.Property(e => e.Username).HasMaxLength(100);
         });
 

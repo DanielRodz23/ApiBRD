@@ -23,7 +23,7 @@ namespace ApiBRD.Controllers
         public IHubContext<CategoriaHub> HubContext { get; }
 
 
-        public CategoriasController(Repository<Categoria> repository,LabsystePwaBrdContext context, IHubContext<CategoriaHub> hubContext, IMapper mapper, IWebHostEnvironment webHostEnvironment)
+        public CategoriasController(Repository<Categoria> repository, LabsystePwaBrdContext context, IHubContext<CategoriaHub> hubContext, IMapper mapper, IWebHostEnvironment webHostEnvironment)
         {
             this.repository = repository;
             this.context = context;
@@ -35,7 +35,7 @@ namespace ApiBRD.Controllers
         [HttpGet]
         public IActionResult GetAll()
         {
-            var categorias = repository.Context.Categoria.Include(x => x.Producto).ToList().Select(x=>mapper.Map<CategoriaIncludeDTO>(x));
+            var categorias = repository.Context.Categoria.Include(x => x.Producto).ToList().Select(x => mapper.Map<CategoriaIncludeDTO>(x));
             return Ok(categorias);
         }
 
@@ -43,23 +43,30 @@ namespace ApiBRD.Controllers
         [HttpPost]
         public async Task<IActionResult> AgregarCategoria(CategoriaImagenDTO dto)
         {
-            if (string.IsNullOrWhiteSpace(dto.Nombre))
+            try
             {
-                return BadRequest("Ingrese el nombre de la categoria.");
+
+                if (string.IsNullOrWhiteSpace(dto.Nombre))
+                {
+                    return BadRequest("Ingrese el nombre de la categoria.");
+                }
+
+                Categoria d = new()
+                {
+                    Nombre = dto.Nombre
+                };
+
+                repository.Insert(d);
+                string path = Path.Combine(webHostEnvironment.WebRootPath, "categorias", d.Id.ToString());
+                ImagenConverter.ConvertBase64ToImage(dto.ImagenBase64, path);
+
+                await HubContext.Clients.All.SendAsync("NuevaCategoria", d);
+                return Ok("La categoria fue agregada con exito.");
             }
-
-            Categoria d = new()
+            catch (Exception ex)
             {
-                Nombre = dto.Nombre
-            };
-
-            repository.Insert(d);
-            Thread.Sleep(1000);
-            string path = Path.Combine(webHostEnvironment.WebRootPath, "categorias", d.Id.ToString());
-            ImagenConverter.ConvertBase64ToImage(dto.ImagenBase64, path);
-
-            await HubContext.Clients.All.SendAsync("NuevaCategoria", d);
-            return Ok("La categoria fue agregada con exito.");
+                return StatusCode(501, ex.Message );
+            }
         }
 
         [HttpPut]
@@ -67,7 +74,7 @@ namespace ApiBRD.Controllers
         {
             var categoria = context.Categoria.Find(dto.Id);
 
-            if(categoria == null)
+            if (categoria == null)
             {
                 return NotFound("La categoria que intenta editar no fue encontrada.");
             }
@@ -75,7 +82,7 @@ namespace ApiBRD.Controllers
             context.Update(categoria);
             int total = context.SaveChanges();
 
-            if(total > 0)
+            if (total > 0)
             {
                 await HubContext.Clients.All.SendAsync("CategoriaEditada", new
                 {
@@ -92,7 +99,7 @@ namespace ApiBRD.Controllers
         public async Task<IActionResult> EliminarCategoria(int id)
         {
             var categoriaExistente = context.Categoria.Find(id);
-            if(categoriaExistente == null)
+            if (categoriaExistente == null)
             {
                 return NotFound("No se pudo encontrar la categoria que desea eliminar.");
             }

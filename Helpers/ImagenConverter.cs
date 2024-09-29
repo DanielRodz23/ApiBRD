@@ -40,7 +40,7 @@ namespace ApiBRD.Helpers
                     {
                         Directory.CreateDirectory(directory);
                     }
-                    image.Save(outputPath);
+                    File.WriteAllBytes(outputPath, imageBytes);
                 }
             }
         }
