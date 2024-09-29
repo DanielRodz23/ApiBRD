@@ -4,7 +4,6 @@ using ApiBRD.Models.Entities;
 using ApiBRD.Repositories;
 using ApiBRD.Services;
 using AutoMapper;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
@@ -43,30 +42,31 @@ namespace ApiBRD.Controllers
         [HttpPost]
         public async Task<IActionResult> AgregarCategoria(CategoriaImagenDTO dto)
         {
+            if (string.IsNullOrWhiteSpace(dto.Nombre))
+            {
+                return BadRequest("Ingrese el nombre de la categoria.");
+            }
+
+            Categoria d = new()
+            {
+                Nombre = dto.Nombre
+            };
+
+            repository.Insert(d);
+
             try
             {
-
-                if (string.IsNullOrWhiteSpace(dto.Nombre))
-                {
-                    return BadRequest("Ingrese el nombre de la categoria.");
-                }
-
-                Categoria d = new()
-                {
-                    Nombre = dto.Nombre
-                };
-
-                repository.Insert(d);
                 string path = Path.Combine(webHostEnvironment.WebRootPath, "categorias", d.Id.ToString());
                 ImagenConverter.ConvertBase64ToImage(dto.ImagenBase64, path);
-
-                await HubContext.Clients.All.SendAsync("NuevaCategoria", d);
-                return Ok("La categoria fue agregada con exito.");
             }
             catch (Exception ex)
             {
-                return StatusCode(501, ex.Message );
+                repository.Delete(d);
+                return StatusCode(500, "Error al guardar la imagen: " + ex.Message);
             }
+
+            await HubContext.Clients.All.SendAsync("NuevaCategoria", d);
+            return Ok("La categoria fue agregada con exito.");
         }
 
         [HttpPut]

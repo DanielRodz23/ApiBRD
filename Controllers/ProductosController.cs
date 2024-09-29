@@ -1,4 +1,5 @@
-﻿using ApiBRD.Models.DTOs;
+﻿using ApiBRD.Helpers;
+using ApiBRD.Models.DTOs;
 using ApiBRD.Models.Entities;
 using ApiBRD.Repositories;
 using ApiBRD.Services;
@@ -16,12 +17,14 @@ namespace ApiBRD.Controllers
         private readonly Repository<Producto> repository;
         private readonly IHubContext<CategoriaHub> hubContext;
         private readonly IMapper mapper;
+        private readonly IWebHostEnvironment webHostEnvironment;
 
-        public ProductosController(Repository<Producto> repository, IHubContext<CategoriaHub> hubContext, IMapper mapper)
+        public ProductosController(Repository<Producto> repository, IHubContext<CategoriaHub> hubContext, IMapper mapper, IWebHostEnvironment webHostEnvironment)
         {
             this.repository = repository;
             this.hubContext = hubContext;
             this.mapper = mapper;
+            this.webHostEnvironment = webHostEnvironment;
         }
 
 
@@ -62,7 +65,16 @@ namespace ApiBRD.Controllers
             };
             repository.Insert(p);
 
-
+            try
+            {
+                string path = Path.Combine(webHostEnvironment.WebRootPath, "producto", p.Id.ToString());
+                ImagenConverter.ConvertBase64ToImage(dto.ImagenBase64, path);
+            }
+            catch (Exception ex)
+            {
+                repository.Delete(p);
+                return StatusCode(500, "Error al guardar imagen: " + ex.Message );
+            }
 
             await hubContext.Clients.All.SendAsync("NuevoProducto", p);
 
