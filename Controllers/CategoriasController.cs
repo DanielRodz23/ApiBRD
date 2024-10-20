@@ -14,7 +14,8 @@ namespace ApiBRD.Controllers
     [ApiController]
     public class CategoriasController : ControllerBase
     {
-        private readonly Repository<Categoria> repository;
+        private readonly Repository<Producto> repositoryProductos;
+        private readonly Repository<Categoria> repositoryCategorias;
         private readonly IMapper mapper;
         private readonly IWebHostEnvironment webHostEnvironment;
 
@@ -22,9 +23,10 @@ namespace ApiBRD.Controllers
         public IHubContext<CategoriaHub> HubContext { get; }
 
 
-        public CategoriasController(Repository<Categoria> repository, LabsystePwaBrdContext context, IHubContext<CategoriaHub> hubContext, IMapper mapper, IWebHostEnvironment webHostEnvironment)
+        public CategoriasController(Repository<Producto> repositoryProductos,Repository<Categoria> repository, LabsystePwaBrdContext context, IHubContext<CategoriaHub> hubContext, IMapper mapper, IWebHostEnvironment webHostEnvironment)
         {
-            this.repository = repository;
+            this.repositoryProductos = repositoryProductos;
+            this.repositoryCategorias = repository;
             this.context = context;
             HubContext = hubContext;
             this.mapper = mapper;
@@ -34,7 +36,7 @@ namespace ApiBRD.Controllers
         [HttpGet]
         public IActionResult GetAll()
         {
-            var categorias = repository.Context.Categoria.Include(x => x.Producto).ToList().Select(x => mapper.Map<CategoriaIncludeDTO>(x));
+            var categorias = repositoryCategorias.Context.Categoria.Include(x => x.Producto).ToList().Select(x => mapper.Map<CategoriaIncludeDTO>(x));
             return Ok(categorias);
         }
 
@@ -52,7 +54,7 @@ namespace ApiBRD.Controllers
                 Nombre = dto.Nombre
             };
 
-            repository.Insert(d);
+            repositoryCategorias.Insert(d);
 
             try
             {
@@ -61,7 +63,7 @@ namespace ApiBRD.Controllers
             }
             catch (Exception ex)
             {
-                repository.Delete(d);
+                repositoryCategorias.Delete(d);
                 return StatusCode(500, "Error al guardar la imagen: " + ex.Message);
             }
 
@@ -80,7 +82,7 @@ namespace ApiBRD.Controllers
             }
             categoria.Nombre = dto.Nombre;
 
-            if (dto.ImagenBase64!=null)
+            if (dto.ImagenBase64 != null)
             {
                 try
                 {
@@ -110,13 +112,19 @@ namespace ApiBRD.Controllers
         }
 
 
-        [HttpDelete]
+        [HttpDelete("{id}")]
         public async Task<IActionResult> EliminarCategoria(int id)
         {
             var categoriaExistente = context.Categoria.Find(id);
             if (categoriaExistente == null)
             {
                 return NotFound("No se pudo encontrar la categoria que desea eliminar.");
+            }
+
+            var data = repositoryProductos.GetAll().Where(x => x.IdCategoria == id).ToList();
+            foreach (var item in data)
+            {
+                repositoryProductos.Delete(item);
             }
 
             context.Remove(categoriaExistente);
