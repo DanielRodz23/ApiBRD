@@ -11,6 +11,9 @@ namespace ApiBRD.Helpers
         {
             CreateMap<Producto, ProductoDTO>();
             CreateMap<ProductoDTO, Producto>();
+            CreateMap<Producto, ProductoIncludeDTO>()
+                .ForMember(dest => dest.Categoria, opt => opt.MapFrom(src => src.IdCategoriaNavigation));
+
 
             CreateMap<Categoria, CategoriaDTO>();
             CreateMap<CategoriaDTO, Categoria>();

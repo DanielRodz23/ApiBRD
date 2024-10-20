@@ -70,7 +70,7 @@ namespace ApiBRD.Controllers
         }
 
         [HttpPut]
-        public async Task<IActionResult> EditarCategoria(CategoriaDTO dto)
+        public async Task<IActionResult> EditarCategoria(CategoriaImagenDTO dto)
         {
             var categoria = context.Categoria.Find(dto.Id);
 
@@ -79,6 +79,21 @@ namespace ApiBRD.Controllers
                 return NotFound("La categoria que intenta editar no fue encontrada.");
             }
             categoria.Nombre = dto.Nombre;
+
+            if (dto.ImagenBase64!=null)
+            {
+                try
+                {
+                    string path = Path.Combine(webHostEnvironment.WebRootPath, "categorias", dto.Id.ToString());
+                    ImagenConverter.ConvertBase64ToImage(dto.ImagenBase64, path);
+                }
+                catch (Exception ex)
+                {
+                    return StatusCode(500, "Error al subir nueva imagen:" + ex.Message);
+                }
+            }
+
+
             context.Update(categoria);
             int total = context.SaveChanges();
 

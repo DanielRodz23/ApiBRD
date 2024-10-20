@@ -7,6 +7,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 
 namespace ApiBRD.Controllers
 {
@@ -32,7 +33,8 @@ namespace ApiBRD.Controllers
         [HttpGet]
         public IActionResult GetAll()
         {
-            var data = repository.GetAll().Select(x => mapper.Map<ProductoDTO>(x));
+            var data = repository.Context.Producto.Include(x => x.IdCategoriaNavigation)
+                .Select(x => mapper.Map<ProductoIncludeDTO>(x));
             return Ok(data);
         }
 
@@ -65,15 +67,18 @@ namespace ApiBRD.Controllers
             };
             repository.Insert(p);
 
-            try
+            if (!string.IsNullOrWhiteSpace(dto.ImagenBase64))
             {
-                string path = Path.Combine(webHostEnvironment.WebRootPath, "producto", p.Id.ToString());
-                ImagenConverter.ConvertBase64ToImage(dto.ImagenBase64, path);
-            }
-            catch (Exception ex)
-            {
-                repository.Delete(p);
-                return StatusCode(500, "Error al guardar imagen: " + ex.Message );
+                try
+                {
+                    string path = Path.Combine(webHostEnvironment.WebRootPath, "producto", p.Id.ToString());
+                    ImagenConverter.ConvertBase64ToImage(dto.ImagenBase64, path);
+                }
+                catch (Exception ex)
+                {
+                    repository.Delete(p);
+                    return StatusCode(500, "Error al guardar imagen: " + ex.Message);
+                }
             }
 
             await hubContext.Clients.All.SendAsync("NuevoProducto", p);
@@ -96,7 +101,7 @@ namespace ApiBRD.Controllers
         }
 
         [HttpPut]
-        public async Task<IActionResult> EditarProducto(ProductoDTO dto)
+        public async Task<IActionResult> EditarProducto(ProductoImagenDTO dto)
         {
             var productoexistente = repository.GetById(dto.Id);
 
@@ -107,6 +112,21 @@ namespace ApiBRD.Controllers
             productoexistente.Nombre = dto.Nombre;
             productoexistente.Precio = dto.Precio;
             productoexistente.Disponible = dto.Disponible;
+            productoexistente.IdCategoria = dto.IdCategoria;
+
+            if (dto.ImagenBase64 != null)
+            {
+                try
+                {
+                    string path = Path.Combine(webHostEnvironment.WebRootPath, "producto", dto.Id.ToString());
+                    ImagenConverter.ConvertBase64ToImage(dto.ImagenBase64, path);
+                }
+                catch (Exception ex)
+                {
+
+                    return StatusCode(500, "Error en la imagen:" + ex.Message);
+                }
+            }
 
             repository.Update(productoexistente);
 
@@ -127,7 +147,7 @@ namespace ApiBRD.Controllers
 
             if (repository.Context.Menudeldia.Any(x => x.IdProducto == productoexistente.Id))
             {
-                var men = repository.Context.Menudeldia.FirstOrDefault(x => x.IdProducto == productoexistente.Id)??throw new Exception("Error al buscar en menu del dia");
+                var men = repository.Context.Menudeldia.FirstOrDefault(x => x.IdProducto == productoexistente.Id) ?? throw new Exception("Error al buscar en menu del dia");
                 repository.Context.Set<Menudeldia>().Remove(men);
                 repository.Context.SaveChanges();
             }
