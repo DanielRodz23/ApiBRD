@@ -19,13 +19,23 @@ namespace ApiBRD.Controllers
         private readonly IHubContext<CategoriaHub> hubContext;
         private readonly IMapper mapper;
         private readonly IWebHostEnvironment webHostEnvironment;
-
-        public ProductosController(Repository<Producto> repository, IHubContext<CategoriaHub> hubContext, IMapper mapper, IWebHostEnvironment webHostEnvironment)
+        private readonly Repository<Categoria> repositoryCategoria;
+        public ProductosController(Repository<Categoria> repositoryCategoria, Repository<Producto> repository, IHubContext<CategoriaHub> hubContext, IMapper mapper, IWebHostEnvironment webHostEnvironment)
         {
             this.repository = repository;
             this.hubContext = hubContext;
             this.mapper = mapper;
             this.webHostEnvironment = webHostEnvironment;
+            this.repositoryCategoria = repositoryCategoria;
+        }
+
+        [HttpGet("Categoria/{id:int}")]
+        public async Task<IActionResult> GetProductosByCategoria(int id)
+        {
+            var categoria = repositoryCategoria.Context.Categoria.Include(x => x.Producto).FirstOrDefault(x => x.Id == id);
+            if (categoria == null) return NotFound("Category doesn't exist");
+            var dato = categoria.Producto.Select(mapper.Map<ProductoDTO>);
+            return Ok(dato);
         }
 
 
