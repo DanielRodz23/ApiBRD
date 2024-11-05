@@ -4,6 +4,7 @@ using ApiBRD.Models.DTOs;
 using ApiBRD.Models.Entities;
 using ApiBRD.Repositories;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
@@ -12,6 +13,7 @@ namespace ApiBRD.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class CategoriasController : ControllerBase
     {
         private readonly Repository<Producto> repositoryProductos;
@@ -34,12 +36,20 @@ namespace ApiBRD.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public IActionResult GetAll()
         {
-            var categorias = repositoryCategorias.Context.Categoria.Include(x => x.Producto).ToList().Select(x => mapper.Map<CategoriaIncludeDTO>(x));
+            var categorias = repositoryCategorias.Context.Categoria.Include(x => x.Producto).ToList().Select(mapper.Map<CategoriaIncludeDTO>);
             return Ok(categorias);
         }
-
+        [HttpGet("{id:int}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetCategoryById(int id)
+        {
+            var cat = repositoryCategorias.GetById(id);
+            if (cat == null) return NotFound();
+            return Ok(mapper.Map<CategoriaDTO>(cat));
+        }
 
         [HttpPost]
         public async Task<IActionResult> AgregarCategoria(CategoriaImagenDTO dto)
@@ -67,7 +77,7 @@ namespace ApiBRD.Controllers
                 return StatusCode(500, "Error al guardar la imagen: " + ex.Message);
             }
 
-            await HubContext.Clients.All.SendAsync("NuevaCategoria", d);
+            await HubContext.Clients.All.SendAsync("NuevaCategoria", mapper.Map<CategoriaDTO>(d));
             return Ok("La categoria fue agregada con exito.");
         }
 
@@ -101,11 +111,7 @@ namespace ApiBRD.Controllers
 
             if (total > 0)
             {
-                await HubContext.Clients.All.SendAsync("CategoriaEditada", new
-                {
-                    categoria.Id,
-                    categoria.Nombre,
-                });
+                await HubContext.Clients.All.SendAsync("CategoriaEditada", mapper.Map<CategoriaDTO>(categoria));
             }
 
             return Ok("La categoria fue editada con exito");

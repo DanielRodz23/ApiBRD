@@ -14,7 +14,7 @@ namespace ApiBRD.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-
+    [Authorize]
     public class ProductosController : ControllerBase
     {
         private readonly Repository<Producto> repository;
@@ -32,6 +32,7 @@ namespace ApiBRD.Controllers
         }
 
         [HttpGet("Categoria/{id:int}")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetProductosByCategoria(int id)
         {
             var categoria = repositoryCategoria.Context.Categoria.Include(x => x.Producto).FirstOrDefault(x => x.Id == id);
@@ -43,7 +44,7 @@ namespace ApiBRD.Controllers
 
 
         [HttpGet]
-        [Authorize]
+        [AllowAnonymous]
         public IActionResult GetAll()
         {
             var data = repository.Context.Producto.Include(x => x.IdCategoriaNavigation)
@@ -52,6 +53,7 @@ namespace ApiBRD.Controllers
         }
 
         [HttpGet("{id:int}")]
+        [AllowAnonymous]
         public IActionResult GetById(int id)
         {
             var dato = repository.GetById(id);

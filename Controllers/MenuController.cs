@@ -2,6 +2,7 @@
 using ApiBRD.Models.Entities;
 using ApiBRD.Repositories;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -10,17 +11,19 @@ namespace ApiBRD.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class MenuController : ControllerBase
     {
         private readonly Repository<Menudeldia> repositoryMenu;
         private readonly IMapper mapper;
 
-        public MenuController(Repository<Menudeldia> repositoryMenu, IMapper mapper)
+        public MenuController(Repository<Menudeldia> repositoryMenu, IMapper mapper, icon)
         {
             this.repositoryMenu = repositoryMenu;
             this.mapper = mapper;
         }
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> Get()
         {
             var datos = repositoryMenu.Context.Menudeldia.Include(x => x.IdProductoNavigation).ToList().Select(x => mapper.Map<MenuDelDiaDTO>(x));
@@ -28,6 +31,7 @@ namespace ApiBRD.Controllers
             //datos.ForEach(x => mapper.Map<MenuDelDiaDTO>(x));
             return Ok(datos);
         }
+        
         [HttpPost]
         public async Task<IActionResult> Post(int[] ids)
         {
@@ -59,6 +63,8 @@ namespace ApiBRD.Controllers
                 repositoryMenu.Context.Menudeldia.Add(newmenu);
             }
             repositoryMenu.Context.SaveChanges();
+
+
 
             return Ok();
         }
