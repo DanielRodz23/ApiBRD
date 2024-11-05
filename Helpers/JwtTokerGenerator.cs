@@ -21,15 +21,15 @@ namespace ApiBRD.Helpers
             var audience = configuration.GetSection("Jwt").GetValue<string>("Audience");
             var secret = configuration.GetSection("Jwt").GetValue<string>("Secret");
 
-            List<Claim> basicas = new List<Claim>()
-            {
+            List<Claim> basicas =
+            [
                 new Claim(ClaimTypes.Name, username),
                 new Claim(ClaimTypes.Role, role),
                 new Claim("IdUsuario", id.ToString()),
                 new Claim(JwtRegisteredClaimNames.Iss, issuer),
-                new Claim(JwtRegisteredClaimNames.Aud, audience)
-            };
-            basicas.AddRange(claims);
+                new Claim(JwtRegisteredClaimNames.Aud, audience),
+                .. claims,
+            ];
 
             JwtSecurityToken jwt = new JwtSecurityToken(
                 issuer,

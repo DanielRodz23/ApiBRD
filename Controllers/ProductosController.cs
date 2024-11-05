@@ -4,6 +4,7 @@ using ApiBRD.Models.DTOs;
 using ApiBRD.Models.Entities;
 using ApiBRD.Repositories;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
@@ -13,6 +14,7 @@ namespace ApiBRD.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+
     public class ProductosController : ControllerBase
     {
         private readonly Repository<Producto> repository;
@@ -41,6 +43,7 @@ namespace ApiBRD.Controllers
 
 
         [HttpGet]
+        [Authorize]
         public IActionResult GetAll()
         {
             var data = repository.Context.Producto.Include(x => x.IdCategoriaNavigation)
