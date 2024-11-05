@@ -1,11 +1,11 @@
 using ApiBRD.Helpers;
 using ApiBRD.Models.Entities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using ApiBRD.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using ApiBRD.Repositories;
+using ApiBRD.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 

@@ -1,8 +1,8 @@
 ﻿using ApiBRD.Helpers;
+using ApiBRD.Hubs;
 using ApiBRD.Models.DTOs;
 using ApiBRD.Models.Entities;
 using ApiBRD.Repositories;
-using ApiBRD.Services;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;

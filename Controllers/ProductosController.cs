@@ -1,8 +1,8 @@
 ﻿using ApiBRD.Helpers;
+using ApiBRD.Hubs;
 using ApiBRD.Models.DTOs;
 using ApiBRD.Models.Entities;
 using ApiBRD.Repositories;
-using ApiBRD.Services;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -107,6 +107,7 @@ namespace ApiBRD.Controllers
 
             dato.Disponible = disponible;
             repository.Update(dato);
+            await hubContext.Clients.All.SendAsync("disponibilidad", new { id = dato.Id, disponibilidad = dato.Disponible });
             return Ok();
         }
 
