@@ -72,6 +72,7 @@ public partial class LabsystePwaBrdContext : DbContext
 
             entity.HasOne(d => d.IdCategoriaNavigation).WithMany(p => p.Producto)
                 .HasForeignKey(d => d.IdCategoria)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("producto_ibfk_1");
         });
 
