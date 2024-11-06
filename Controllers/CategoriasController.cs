@@ -22,15 +22,13 @@ namespace ApiBRD.Controllers
         private readonly IWebHostEnvironment webHostEnvironment;
 
         public LabsystePwaBrdContext context { get; }
-        public IHubContext<CategoriaHub> HubContext { get; }
 
 
-        public CategoriasController(Repository<Producto> repositoryProductos,Repository<Categoria> repository, LabsystePwaBrdContext context, IHubContext<CategoriaHub> hubContext, IMapper mapper, IWebHostEnvironment webHostEnvironment)
+        public CategoriasController(Repository<Producto> repositoryProductos,Repository<Categoria> repository, LabsystePwaBrdContext context, IMapper mapper, IWebHostEnvironment webHostEnvironment)
         {
             this.repositoryProductos = repositoryProductos;
             this.repositoryCategorias = repository;
             this.context = context;
-            HubContext = hubContext;
             this.mapper = mapper;
             this.webHostEnvironment = webHostEnvironment;
         }
@@ -77,7 +75,7 @@ namespace ApiBRD.Controllers
                 return StatusCode(500, "Error al guardar la imagen: " + ex.Message);
             }
 
-            await HubContext.Clients.All.SendAsync("NuevaCategoria", mapper.Map<CategoriaDTO>(d));
+            //await HubContext.Clients.All.SendAsync("NuevaCategoria", mapper.Map<CategoriaDTO>(d));
             return Ok("La categoria fue agregada con exito.");
         }
 
@@ -109,10 +107,10 @@ namespace ApiBRD.Controllers
             context.Update(categoria);
             int total = context.SaveChanges();
 
-            if (total > 0)
-            {
-                await HubContext.Clients.All.SendAsync("CategoriaEditada", mapper.Map<CategoriaDTO>(categoria));
-            }
+            //if (total > 0)
+            //{
+            //    await HubContext.Clients.All.SendAsync("CategoriaEditada", mapper.Map<CategoriaDTO>(categoria));
+            //}
 
             return Ok("La categoria fue editada con exito");
         }
@@ -136,7 +134,7 @@ namespace ApiBRD.Controllers
             context.Remove(categoriaExistente);
             context.SaveChanges();
 
-            await HubContext.Clients.All.SendAsync("CategoriaEliminada", categoriaExistente.Id);
+            //await HubContext.Clients.All.SendAsync("CategoriaEliminada", categoriaExistente.Id);
 
             return Ok("La categoria fue eliminada con exito.");
         }

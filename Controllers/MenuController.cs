@@ -17,7 +17,7 @@ namespace ApiBRD.Controllers
         private readonly Repository<Menudeldia> repositoryMenu;
         private readonly IMapper mapper;
 
-        public MenuController(Repository<Menudeldia> repositoryMenu, IMapper mapper, icon)
+        public MenuController(Repository<Menudeldia> repositoryMenu, IMapper mapper)
         {
             this.repositoryMenu = repositoryMenu;
             this.mapper = mapper;

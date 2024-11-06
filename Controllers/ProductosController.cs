@@ -96,7 +96,7 @@ namespace ApiBRD.Controllers
                 }
             }
 
-            await hubContext.Clients.All.SendAsync("NuevoProducto", p);
+            //await hubContext.Clients.All.SendAsync("NuevoProducto", p);
 
             return Ok("El producto fue agregado con exito.");
         }
@@ -146,7 +146,7 @@ namespace ApiBRD.Controllers
 
             repository.Update(productoexistente);
 
-            await hubContext.Clients.All.SendAsync("ProductoEditado", mapper.Map<ProductoDTO>(productoexistente));
+            //await hubContext.Clients.All.SendAsync("ProductoEditado", mapper.Map<ProductoDTO>(productoexistente));
 
             return Ok("El producto fue editado con exito.");
         }
@@ -170,7 +170,7 @@ namespace ApiBRD.Controllers
 
             repository.Delete(id);
 
-            await hubContext.Clients.All.SendAsync("ProductoEliminado", productoexistente.Id);
+            //await hubContext.Clients.All.SendAsync("ProductoEliminado", productoexistente.Id);
 
             return Ok("El producto fue eliminado con exito.");
         }
