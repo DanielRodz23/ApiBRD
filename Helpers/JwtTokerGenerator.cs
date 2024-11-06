@@ -6,17 +6,13 @@ using System.Text;
 
 namespace ApiBRD.Helpers
 {
-    public class JwtTokerGenerator
+    public class JwtTokerGenerator(IConfiguration configuration)
     {
-        private readonly IConfiguration configuration;
+        private readonly IConfiguration configuration = configuration;
 
-        public JwtTokerGenerator(IConfiguration configuration)
-        {
-            this.configuration = configuration;
-        }
         public string GetToken(string username, string role, int id, List<Claim> claims)
         {
-            JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
+            JwtSecurityTokenHandler handler = new();
             var issuer = configuration.GetSection("Jwt").GetValue<string>("Issuer");
             var audience = configuration.GetSection("Jwt").GetValue<string>("Audience");
             var secret = configuration.GetSection("Jwt").GetValue<string>("Secret");
@@ -31,7 +27,7 @@ namespace ApiBRD.Helpers
                 .. claims,
             ];
 
-            JwtSecurityToken jwt = new JwtSecurityToken(
+            JwtSecurityToken jwt = new(
                 issuer,
                 audience,
                 basicas,

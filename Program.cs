@@ -89,6 +89,7 @@ app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
 app.MapHub<CategoriaHub>("/hub");
 app.MapControllers();
 

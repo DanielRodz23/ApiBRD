@@ -10,15 +10,11 @@ namespace ApiBRD.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AuthenticationController : ControllerBase
+    public class AuthenticationController(Repository<Usuario> repositoryUsuario, JwtTokerGenerator tokenGenerator) : ControllerBase
     {
-        private readonly Repository<Usuario> repositoryUsuario;
-        private readonly JwtTokerGenerator tokenGenerator;
-        public AuthenticationController(Repository<Usuario> repositoryUsuario, JwtTokerGenerator tokenGenerator)
-        {
-            this.repositoryUsuario = repositoryUsuario;
-            this.tokenGenerator = tokenGenerator;
-        }
+        private readonly Repository<Usuario> repositoryUsuario = repositoryUsuario;
+        private readonly JwtTokerGenerator tokenGenerator = tokenGenerator;
+
         [HttpPost]
         public async Task<IActionResult> Post(LoginDto dto)
         {

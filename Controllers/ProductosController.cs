@@ -15,21 +15,13 @@ namespace ApiBRD.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class ProductosController : ControllerBase
+    public class ProductosController(Repository<Categoria> repositoryCategoria, Repository<Producto> repository, IHubContext<CategoriaHub> hubContext, IMapper mapper, IWebHostEnvironment webHostEnvironment) : ControllerBase
     {
-        private readonly Repository<Producto> repository;
-        private readonly IHubContext<CategoriaHub> hubContext;
-        private readonly IMapper mapper;
-        private readonly IWebHostEnvironment webHostEnvironment;
-        private readonly Repository<Categoria> repositoryCategoria;
-        public ProductosController(Repository<Categoria> repositoryCategoria, Repository<Producto> repository, IHubContext<CategoriaHub> hubContext, IMapper mapper, IWebHostEnvironment webHostEnvironment)
-        {
-            this.repository = repository;
-            this.hubContext = hubContext;
-            this.mapper = mapper;
-            this.webHostEnvironment = webHostEnvironment;
-            this.repositoryCategoria = repositoryCategoria;
-        }
+        private readonly Repository<Producto> repository = repository;
+        private readonly IHubContext<CategoriaHub> hubContext = hubContext;
+        private readonly IMapper mapper = mapper;
+        private readonly IWebHostEnvironment webHostEnvironment = webHostEnvironment;
+        private readonly Repository<Categoria> repositoryCategoria = repositoryCategoria;
 
         [HttpGet("Categoria/{id:int}")]
         [AllowAnonymous]
@@ -111,7 +103,7 @@ namespace ApiBRD.Controllers
             }
 
             //await hubContext.Clients.All.SendAsync("NuevoProducto", p);
-
+            LastUpdateManager.UpdateProductos();
             return Ok("El producto fue agregado con exito.");
         }
 
@@ -161,7 +153,7 @@ namespace ApiBRD.Controllers
             repository.Update(productoexistente);
 
             //await hubContext.Clients.All.SendAsync("ProductoEditado", mapper.Map<ProductoDTO>(productoexistente));
-
+            LastUpdateManager.UpdateProductos();
             return Ok("El producto fue editado con exito.");
         }
 
@@ -185,7 +177,7 @@ namespace ApiBRD.Controllers
             repository.Delete(id);
 
             //await hubContext.Clients.All.SendAsync("ProductoEliminado", productoexistente.Id);
-
+            LastUpdateManager.UpdateProductos();
             return Ok("El producto fue eliminado con exito.");
         }
     }

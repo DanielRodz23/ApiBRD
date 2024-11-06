@@ -14,24 +14,14 @@ namespace ApiBRD.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class CategoriasController : ControllerBase
+    public class CategoriasController(Repository<Producto> repositoryProductos, Repository<Categoria> repository, LabsystePwaBrdContext context, IMapper mapper, IWebHostEnvironment webHostEnvironment) : ControllerBase
     {
-        private readonly Repository<Producto> repositoryProductos;
-        private readonly Repository<Categoria> repositoryCategorias;
-        private readonly IMapper mapper;
-        private readonly IWebHostEnvironment webHostEnvironment;
+        private readonly Repository<Producto> repositoryProductos = repositoryProductos;
+        private readonly Repository<Categoria> repositoryCategorias = repository;
+        private readonly IMapper mapper = mapper;
+        private readonly IWebHostEnvironment webHostEnvironment = webHostEnvironment;
 
-        public LabsystePwaBrdContext context { get; }
-
-
-        public CategoriasController(Repository<Producto> repositoryProductos,Repository<Categoria> repository, LabsystePwaBrdContext context, IMapper mapper, IWebHostEnvironment webHostEnvironment)
-        {
-            this.repositoryProductos = repositoryProductos;
-            this.repositoryCategorias = repository;
-            this.context = context;
-            this.mapper = mapper;
-            this.webHostEnvironment = webHostEnvironment;
-        }
+        public LabsystePwaBrdContext Context { get; } = context;
 
         [HttpGet]
         [AllowAnonymous]
@@ -74,7 +64,7 @@ namespace ApiBRD.Controllers
                 repositoryCategorias.Delete(d);
                 return StatusCode(500, "Error al guardar la imagen: " + ex.Message);
             }
-
+            LastUpdateManager.UpdateCategorias();
             //await HubContext.Clients.All.SendAsync("NuevaCategoria", mapper.Map<CategoriaDTO>(d));
             return Ok("La categoria fue agregada con exito.");
         }
@@ -82,7 +72,7 @@ namespace ApiBRD.Controllers
         [HttpPut]
         public async Task<IActionResult> EditarCategoria(CategoriaImagenDTO dto)
         {
-            var categoria = context.Categoria.Find(dto.Id);
+            var categoria = Context.Categoria.Find(dto.Id);
 
             if (categoria == null)
             {
@@ -104,14 +94,14 @@ namespace ApiBRD.Controllers
             }
 
 
-            context.Update(categoria);
-            int total = context.SaveChanges();
+            Context.Update(categoria);
+            Context.SaveChanges();
 
             //if (total > 0)
             //{
             //    await HubContext.Clients.All.SendAsync("CategoriaEditada", mapper.Map<CategoriaDTO>(categoria));
             //}
-
+            LastUpdateManager.UpdateCategorias();
             return Ok("La categoria fue editada con exito");
         }
 
@@ -119,7 +109,7 @@ namespace ApiBRD.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> EliminarCategoria(int id)
         {
-            var categoriaExistente = context.Categoria.Find(id);
+            var categoriaExistente = Context.Categoria.Find(id);
             if (categoriaExistente == null)
             {
                 return NotFound("No se pudo encontrar la categoria que desea eliminar.");
@@ -131,11 +121,11 @@ namespace ApiBRD.Controllers
                 repositoryProductos.Delete(item);
             }
 
-            context.Remove(categoriaExistente);
-            context.SaveChanges();
+            Context.Remove(categoriaExistente);
+            Context.SaveChanges();
 
             //await HubContext.Clients.All.SendAsync("CategoriaEliminada", categoriaExistente.Id);
-
+            LastUpdateManager.UpdateCategorias();
             return Ok("La categoria fue eliminada con exito.");
         }
     }
