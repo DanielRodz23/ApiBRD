@@ -54,7 +54,7 @@ namespace ApiBRD.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        public IActionResult GetAllIdYDisponible()
+        public IActionResult GetAllDisponibleYId()
         {
             var data = repository.Context.Producto.Select(x => new
             {
