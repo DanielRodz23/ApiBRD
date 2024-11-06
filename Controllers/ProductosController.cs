@@ -52,7 +52,7 @@ namespace ApiBRD.Controllers
             return Ok(data);
         }
 
-        [HttpGet]
+        [HttpGet("DisponiblesYId")]
         [AllowAnonymous]
         public IActionResult GetAllDisponibleYId()
         {
