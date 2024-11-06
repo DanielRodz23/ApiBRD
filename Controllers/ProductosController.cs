@@ -52,6 +52,20 @@ namespace ApiBRD.Controllers
             return Ok(data);
         }
 
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult GetAllDisponibleYId()
+        {
+            var data = repository.Context.Producto.Select(x => new
+            {
+                x.Id,
+                x.Disponible
+            });
+            return Ok(data);
+        }
+
+
+
         [HttpGet("{id:int}")]
         [AllowAnonymous]
         public IActionResult GetById(int id)
