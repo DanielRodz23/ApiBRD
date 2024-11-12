@@ -151,7 +151,7 @@ namespace ApiBRD.Controllers
             }
 
             repository.Update(productoexistente);
-
+            await hubContext.Clients.All.SendAsync("disponibilidad", new { id = dto.Id, disponibilidad = dto.Disponible });
             //await hubContext.Clients.All.SendAsync("ProductoEditado", mapper.Map<ProductoDTO>(productoexistente));
             LastUpdateManager.UpdateProductos();
             return Ok("El producto fue editado con exito.");

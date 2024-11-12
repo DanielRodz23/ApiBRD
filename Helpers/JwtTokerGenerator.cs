@@ -32,7 +32,7 @@ namespace ApiBRD.Helpers
                 audience,
                 basicas,
                 DateTime.Now,
-                DateTime.Now.AddMinutes(50),
+                DateTime.Now.AddDays(7),
                 new SigningCredentials
                 (new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret ?? "")),
                 SecurityAlgorithms.HmacSha256)
