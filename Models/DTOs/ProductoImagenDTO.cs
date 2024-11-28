@@ -2,6 +2,6 @@
 {
     public class ProductoImagenDTO:ProductoDTO
     {
-        public string ImagenBase64 { get; set; } = null!;
+        public string? ImagenBase64 { get; set; }
     }
 }
